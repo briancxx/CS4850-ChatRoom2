@@ -52,17 +52,19 @@ def client(c, addr):
             # LOGIN REQUEST
             elif brokeninput[0] == "login":
                 print "LOGIN REQUEST FROM", addr
-                print brokeninput[0], brokeninput[1], brokeninput[2]
-                if(loginDictionary[str(brokeninput[1])] == brokeninput[2]):
-                    print "SUCCESSFUL LOGIN FROM", addr, "TO USER", brokeninput[1]
-                    loginID = brokeninput[1]
-                    clientDictionary[loginID] = c
-                    c.send("Server: Now logged in to user " + loginID + ".")
-                    sendToAll("Server", loginID + " has joined.")
+                if str(brokeninput[1]) not in loginDictionary:
+                    if(loginDictionary[str(brokeninput[1])] == brokeninput[2]):
+                        print "SUCCESSFUL LOGIN FROM", addr, "TO USER", brokeninput[1]
+                        loginID = brokeninput[1]
+                        clientDictionary[loginID] = c
+                        c.send("Server: Now logged in to user " + loginID + ".")
+                        sendToAll("Server", loginID + " has joined.")
+                    else:
+                        print "INVALID LOGIN FROM", addr
+                        c.send("Server: Incorrect login.")
+                    repeat = True
                 else:
-                    print "INVALID LOGIN FROM", addr
-                    c.send("Server: Incorrect login.")
-                repeat = True
+                    c.send("Server: User already logged in.")
             # SEND _ REQUEST
             elif brokeninput[0] == "send":
                 print "SEND REQUEST FROM", addr
@@ -83,15 +85,18 @@ def client(c, addr):
                     c.send("Server: Denied. Please login first.")
             # NEWUSER REQUEST
             elif brokeninput[0] == "newuser":
-                loginDictionary[str(brokeninput[1])] = brokeninput[2]
-                loginID = brokeninput[1]
-                file = open(LOGINFILE, "a")
-                file.write("\n" + brokeninput[1] + "," + brokeninput[2])
-                file.close()
-                clientDictionary[loginID] = c
-                c.send("Server: New user created. Now logged in to user " + loginID + ".")
-                sendToAll("Server", loginID + " has joined.")
-                repeat = True
+                if str(brokeninput[1]) not in loginDictionary:
+                    loginDictionary[str(brokeninput[1])] = brokeninput[2]
+                    loginID = brokeninput[1]
+                    file = open(LOGINFILE, "a")
+                    file.write("\n" + brokeninput[1] + "," + brokeninput[2])
+                    file.close()
+                    clientDictionary[loginID] = c
+                    c.send("Server: New user created. Now logged in to user " + loginID + ".")
+                    sendToAll("Server", loginID + " has joined.")
+                    repeat = True
+                else:
+                    c.send("Server: Error. User ID already exists.")
             # UNKNOWN REQUEST
             else:
                 c.send("Server: Invalid request.")
