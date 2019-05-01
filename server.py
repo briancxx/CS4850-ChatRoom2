@@ -77,7 +77,10 @@ def client(c, addr):
                 else:
                     c.send("Server: Denied. Please login first.")
             elif brokeninput[0] == "who":
-                c.send(', '.join(list(clientDictionary.keys())))
+                if loginID != "":
+                    c.send(', '.join(list(clientDictionary.keys())))
+                else:
+                    c.send("Server: Denied. Please login first.")
             # NEWUSER REQUEST
             elif brokeninput[0] == "newuser":
                 loginDictionary[str(brokeninput[1])] = brokeninput[2]
