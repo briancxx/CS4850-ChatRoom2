@@ -63,9 +63,12 @@ def client(c, addr):
             # LOGIN REQUEST
             elif brokeninput[0] == "login":
                 print "LOGIN REQUEST FROM", addr
+                # Verify user not logged in already
                 if loginID != "":
                     c.send("Server: Cannot switch users while logged in.")
+                # Verify user isn't logged in on another computer
                 elif str(brokeninput[1]) not in clientDictionary:
+                    # Lookup password, check success
                     if(loginDictionary[str(brokeninput[1])] == brokeninput[2]):
                         print "SUCCESSFUL LOGIN FROM", addr, "TO USER", brokeninput[1]
                         loginID = brokeninput[1]
@@ -107,21 +110,28 @@ def client(c, addr):
                     c.send("Server: Denied. Please login first.")
             # NEWUSER REQUEST
             elif brokeninput[0] == "newuser":
-                # Verify user doesn't already exist
-                if str(brokeninput[1]) not in loginDictionary:
-                    # Add user to dictionary and to users file
-                    loginDictionary[str(brokeninput[1])] = brokeninput[2]
-                    loginID = brokeninput[1]
-                    file = open(LOGINFILE, "a")
-                    file.write("\n" + brokeninput[1] + "," + brokeninput[2])
-                    file.close()
-                    # Log in user
-                    clientDictionary[loginID] = c
-                    c.send("Server: New user created. Now logged in to user " + loginID + ".")
-                    sendToAllExcluding("Server", loginID, loginID + " has joined.")
-                    repeat = True
+                # Verify user not logged in already
+                if loginID != "":
+                    c.send("Server: Cannot create new user while logged in.")
+                # Verify correct number of characters
+                elif len(str(brokeninput[1])) < 32 and len(str(brokeninput[2])) <= 8 and len(str(brokeninput[2])) >= 4:
+                    # Verify user doesn't already exist
+                    if str(brokeninput[1]) not in loginDictionary:
+                        # Add user to dictionary and to users file
+                        loginDictionary[str(brokeninput[1])] = brokeninput[2]
+                        loginID = brokeninput[1]
+                        file = open(LOGINFILE, "a")
+                        file.write("\n" + brokeninput[1] + "," + brokeninput[2])
+                        file.close()
+                        # Log in user
+                        clientDictionary[loginID] = c
+                        c.send("Server: New user created. Now logged in to user " + loginID + ".")
+                        sendToAllExcluding("Server", loginID, loginID + " has joined.")
+                        repeat = True
+                    else:
+                        c.send("Server: Error. User ID already exists.")
                 else:
-                    c.send("Server: Error. User ID already exists.")
+                    c.send("Server: User ID must be less than 32 characters, and password must be between 4 and 8.")
             # UNKNOWN REQUEST
             else:
                 c.send("Server: Invalid request.")
