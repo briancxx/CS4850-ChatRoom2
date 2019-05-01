@@ -54,7 +54,9 @@ def client(c, addr):
             # LOGIN REQUEST
             elif brokeninput[0] == "login":
                 print "LOGIN REQUEST FROM", addr
-                if str(brokeninput[1]) not in clientDictionary:
+                if loginID != "":
+                    c.send("Server: Cannot switch users while logged in.")
+                elif str(brokeninput[1]) not in clientDictionary:
                     if(loginDictionary[str(brokeninput[1])] == brokeninput[2]):
                         print "SUCCESSFUL LOGIN FROM", addr, "TO USER", brokeninput[1]
                         loginID = brokeninput[1]
@@ -75,6 +77,7 @@ def client(c, addr):
                         print "SEND ALL REQUEST FROM", addr
                         sendToAll(loginID, message[9:])
                     elif brokeninput[1] in clientDictionary:
+                        c.send(loginID + " (to " + brokeninput[1] + "): " + brokeninput[2])
                         clientDictionary[brokeninput[1]].send(loginID + " (to " + brokeninput[1] + "): " + brokeninput[2])
                     elif brokeninput[1] and brokeninput[2]:
                         c.send("Server: Please specify a logged-in recipient.")
