@@ -1,6 +1,7 @@
 # Lab 3 - Chat Room v2
 # CS 4850
 # Brian Cox
+# 01 May 2019
 
 import socket
 import select
