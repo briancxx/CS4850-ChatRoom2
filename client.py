@@ -1,4 +1,4 @@
-# Lab 3
+# Lab 3 - Chat Room v2
 # CS 4850
 # Brian Cox
 
