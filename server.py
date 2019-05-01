@@ -34,7 +34,6 @@ def serverInit(port):
 
 # Create a client thread
 def client(c, addr):
-    global clients
     print "Thread created for", addr
     c.send("Welcome to the chat room!")
     loginID = ""
