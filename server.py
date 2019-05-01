@@ -11,6 +11,7 @@ SERVERPORT = 12492
 
 server = None
 loginDictionary = {}
+clientDictionary = {}
 clients = []
 
 # Initialize global variables
@@ -56,6 +57,7 @@ def client(c, addr):
                 if(loginDictionary[str(brokeninput[1])] == brokeninput[2]):
                     print "SUCCESSFUL LOGIN FROM", addr, "TO USER", brokeninput[1]
                     loginID = brokeninput[1]
+                    clientDictionary[loginID] = c
                     c.send("Server: Now logged in to user " + loginID + ".")
                     sendToAll("Server", loginID + " has joined.")
                 else:
@@ -69,10 +71,14 @@ def client(c, addr):
                     if brokeninput[1] == "all":
                         print "SEND ALL REQUEST FROM", addr
                         sendToAll(loginID, message[9:])
+                    elif brokeninput[1] in clientDictionary:
+                        clientDictionary[brokeninput[1]].send(loginID + " (to " + brokeninput[1] + "): " + brokeninput[2])
                     else:
-                        c.send("Server: Please specify recipient.")
+                        c.send("Server: Please specify a logged-in recipient.")
                 else:
                     c.send("Server: Denied. Please login first.")
+            elif brokeninput[0] == "who":
+                c.send(', '.join(list(clientDictionary.keys())))
             # NEWUSER REQUEST
             elif brokeninput[0] == "newuser":
                 loginDictionary[str(brokeninput[1])] = brokeninput[2]
@@ -80,6 +86,7 @@ def client(c, addr):
                 file = open(LOGINFILE, "a")
                 file.write("\n" + brokeninput[1] + "," + brokeninput[2])
                 file.close()
+                clientDictionary[loginID] = c
                 c.send("Server: New user created. Now logged in to user " + loginID + ".")
                 sendToAll("Server", loginID + " has joined.")
                 repeat = True
