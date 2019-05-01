@@ -48,6 +48,7 @@ def client(c, addr):
             if brokeninput[0] == "logout":
                 print "LOGOUT REQUEST FROM", addr
                 c.close()
+                sendToAll("Server", loginID + " has logged out.")
                 repeat = False
             # LOGIN REQUEST
             elif brokeninput[0] == "login":
@@ -107,9 +108,7 @@ def client(c, addr):
             c.send("Server: Invalid request.")
 
 def sendToAll(fromID, message):
-    print "Start sendToAll"
-    global clients
-    for client in clients:
+    for userID, client in clientDictionary:
         client.send(fromID + ": " + message)
 
 
