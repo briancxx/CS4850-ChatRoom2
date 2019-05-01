@@ -74,8 +74,10 @@ def client(c, addr):
                         sendToAll(loginID, message[9:])
                     elif brokeninput[1] in clientDictionary:
                         clientDictionary[brokeninput[1]].send(loginID + " (to " + brokeninput[1] + "): " + brokeninput[2])
-                    else:
+                    elif brokeninput[1] and brokeninput[2]:
                         c.send("Server: Please specify a logged-in recipient.")
+                    else:
+                        c.send("Server: Invalid request.")
                 else:
                     c.send("Server: Denied. Please login first.")
             elif brokeninput[0] == "who":
