@@ -46,10 +46,11 @@ def client(c, addr):
             # LOGOUT REQUEST
             if brokeninput[0] == "logout":
                 print "LOGOUT REQUEST FROM", addr
-                c.close()
                 if loginID != "":
                     sendToAll("Server", loginID + " has logged out.")
+                    del clientDictionary[loginID]
                 repeat = False
+                c.close()
             # LOGIN REQUEST
             elif brokeninput[0] == "login":
                 print "LOGIN REQUEST FROM", addr
