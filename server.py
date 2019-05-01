@@ -34,6 +34,7 @@ def serverInit(port):
 
 # Create a client thread
 def client(c, addr):
+    global clients
     print "Thread created for", addr
     c.send("Welcome to the chat room!")
     loginID = ""
@@ -56,14 +57,20 @@ def client(c, addr):
                     print "SUCCESSFUL LOGIN FROM", addr, "TO USER", brokeninput[1]
                     loginID = brokeninput[1]
                     c.send("Server: Now logged in to user " + loginID + ".")
+                    sendToAll("Server", loginID + " has joined.")
                 else:
                     print "INVALID LOGIN FROM", addr
                     c.send("Server: Incorrect login.")
                 repeat = True
-            # SEND REQUEST
+            # SEND _ REQUEST
             elif brokeninput[0] == "send":
+                print "SEND REQUEST FROM", addr
                 if loginID != "":
-                    c.send(loginID + ": " + message[5:])
+                    if brokeninput[1] == "all":
+                        print "SEND ALL REQUEST FROM", addr
+                        sendToAll(loginID, message[9:])
+                    else:
+                        c.send("Server: Please specify recipient.")
                 else:
                     c.send("Server: Denied. Please login first.")
             # NEWUSER REQUEST
@@ -74,6 +81,7 @@ def client(c, addr):
                 file.write("\n" + brokeninput[1] + "," + brokeninput[2])
                 file.close()
                 c.send("Server: New user created. Now logged in to user " + loginID + ".")
+                sendToAll("Server", loginID + " has joined.")
                 repeat = True
             # UNKNOWN REQUEST
             else:
@@ -82,6 +90,13 @@ def client(c, addr):
         except:
             c.send("Server: Invalid request.")
 
+def sendToAll(fromID, message):
+    print "Start sendToAll"
+    global clients
+    for client in clients:
+        client.send(fromID + ": " + message)
+
+
 # Run server
 def serverRun():
     print("Server running")
@@ -89,6 +104,8 @@ def serverRun():
     while True:
         c, addr = server.accept()
         print "Got connection from", addr
+        clients.append(c)
+        print clients
         start_new_thread(client, (c, addr))
 
 # Main program

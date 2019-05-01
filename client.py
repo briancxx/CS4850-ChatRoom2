@@ -1,4 +1,6 @@
 import socket
+import select
+import sys
 
 #Global variables
 
@@ -18,24 +20,26 @@ class ChatClient:
         self.repeat = True
         self.login = ""
         while self.repeat:
-            in_message = self.s.recv(1024)
-            print in_message
-            if in_message.startswith("Server: New user created. Now logged in to user "):
-                self.login = in_message[48:(len(in_message) - 1)]
-            elif in_message.startswith("Server: Now logged in to user "):
-                self.login = in_message[30:(len(in_message) - 1)]
-            self.userinput = raw_input(self.login + "> ")
-            self.s.send(str(self.userinput))
-            self.brokeninput = self.userinput.split(" ")
-            if self.brokeninput[0] == "logout":
-                self.repeat = False
-                self.s.close()
-            elif self.brokeninput[0] == "login":
-                self.repeat = True
-            elif self.brokeninput[0] == "send":
-                self.repeat = True
-            else:
-                self.repeat = True
+            sys.stdout.write("> ")
+            sys.stdout.flush()
+            read_sck, write_sck, err_sck = select.select([sys.stdin, self.s],[],[])
+            for socks in read_sck:
+                if socks == self.s:
+                    in_message = self.s.recv(1024)
+                    print in_message
+                    if in_message.startswith("Server: New user created. Now logged in to user "):
+                        self.login = in_message[48:(len(in_message) - 1)]
+                    elif in_message.startswith("Server: Now logged in to user "):
+                        self.login = in_message[30:(len(in_message) - 1)]
+                else:
+                    self.userinput = raw_input()
+                    self.s.send(str(self.userinput))
+                    self.brokeninput = self.userinput.split(" ")
+                    if self.brokeninput[0] == "logout":
+                        self.repeat = False
+                        self.s.close()
+                    else:
+                        self.repeat = True
 
 
 # Main program
