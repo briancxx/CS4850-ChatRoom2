@@ -47,18 +47,19 @@ def client(c, addr):
             if brokeninput[0] == "logout":
                 print "LOGOUT REQUEST FROM", addr
                 c.close()
-                sendToAll("Server", loginID + " has logged out.")
+                if loginID != "":
+                    sendToAll("Server", loginID + " has logged out.")
                 repeat = False
             # LOGIN REQUEST
             elif brokeninput[0] == "login":
                 print "LOGIN REQUEST FROM", addr
-                if str(brokeninput[1]) not in loginDictionary:
+                if str(brokeninput[1]) not in clientDictionary:
                     if(loginDictionary[str(brokeninput[1])] == brokeninput[2]):
                         print "SUCCESSFUL LOGIN FROM", addr, "TO USER", brokeninput[1]
                         loginID = brokeninput[1]
                         clientDictionary[loginID] = c
                         c.send("Server: Now logged in to user " + loginID + ".")
-                        sendToAll("Server", loginID + " has joined.")
+                        sendToAllExcluding("Server", loginID, loginID + " has joined.")
                     else:
                         print "INVALID LOGIN FROM", addr
                         c.send("Server: Incorrect login.")
@@ -95,7 +96,7 @@ def client(c, addr):
                     file.close()
                     clientDictionary[loginID] = c
                     c.send("Server: New user created. Now logged in to user " + loginID + ".")
-                    sendToAll("Server", loginID + " has joined.")
+                    sendToAllExcluding("Server", loginID, loginID + " has joined.")
                     repeat = True
                 else:
                     c.send("Server: Error. User ID already exists.")
@@ -107,8 +108,13 @@ def client(c, addr):
             c.send("Server: Invalid request.")
 
 def sendToAll(fromID, message):
-    for userID, client in clientDictionary:
+    for userID, client in clientDictionary.items():
         client.send(fromID + ": " + message)
+
+def sendToAllExcluding(fromID, excludeID, message):
+    for userID, client in clientDictionary.items():
+        if userID != excludeID:
+            client.send(fromID + ": " + message)
 
 
 # Run server
