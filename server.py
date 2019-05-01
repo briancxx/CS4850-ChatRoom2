@@ -12,7 +12,6 @@ SERVERPORT = 12492
 server = None
 loginDictionary = {}
 clientDictionary = {}
-clients = []
 
 # Initialize global variables
 def serverInit(port):
@@ -111,8 +110,6 @@ def serverRun():
     while True:
         c, addr = server.accept()
         print "Got connection from", addr
-        clients.append(c)
-        print clients
         start_new_thread(client, (c, addr))
 
 # Main program
